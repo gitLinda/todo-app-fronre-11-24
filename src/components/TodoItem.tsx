@@ -1,19 +1,25 @@
 import {Priority, Todo} from "../model/Todo.ts";
+import {useNavigate} from "react-router-dom";
 
 interface TodoItemProps {
-    todo: Todo
+    todo: Todo,
     deleteTodo: (id: string) => void
 }
 
 export function TodoItem({todo, deleteTodo}: TodoItemProps) {
+    const navigate = useNavigate();
 
-    function onEdit(todo: Todo) {
+    function onEdit() {
         console.log(`Edit todo ${todo.id}`)
+    }
+
+    function showDetails() {
+        navigate(`/details/${todo.id}`)
     }
 
     return (
         <div className="todo-item">
-            <div style={{marginRight: "20px"}}>
+            <div style={{marginRight: "20px"}} onClick={showDetails}>
                 <PriorityIcon priority={todo.priority}/>
                 {todo.assignee}: {todo.title}
             </div>
@@ -21,7 +27,7 @@ export function TodoItem({todo, deleteTodo}: TodoItemProps) {
                 <img src="src/assets/edit.png"
                      alt="edit"
                      className="edit-img"
-                     onClick={() => onEdit(todo)}
+                     onClick={onEdit}
                 />
                 <img src="src/assets/delete.png"
                      alt="delete"

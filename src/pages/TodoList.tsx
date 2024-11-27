@@ -1,36 +1,48 @@
 import {Priority, Todo} from "../model/Todo.ts";
-import {TodoItem} from "./TodoItem.tsx";
-import {ChangeEvent, useState} from "react";
-
-interface TodoListProps {
-    todos: Todo[]
-    deleteTodo: (id: string) => void
-}
+import {TodoItem} from "../components/TodoItem.tsx";
+import {ChangeEvent, useEffect, useState} from "react";
+import {deleteTodo, loadTodoList} from "../api/todo-api.ts";
 
 type Filter = "all" | "high-priority" | "medium-priority" | "low-priority"
 type Sort = "assignee" | "priority"
 
-export function TodoList({todos, deleteTodo}: TodoListProps) {
+export function TodoList() {
+    const [todoList, setTodoList] = useState<Todo[]>([]);
     const [filter, setFilter] = useState<Filter>("all")
     const [sort, setSort] = useState<Sort>("priority")
 
-    const visibleTodos = todos
+    useEffect(() => {
+        const response = loadTodoList();
+        setTodoList(response);
+    }, []);
+
+    const visibleTodos = todoList
         .filter(todo => todoFilter(todo, filter))
         .sort((a, b) => todoSort(a, b, sort))
 
     function changeFilter(event: ChangeEvent<HTMLSelectElement>) {
         const newValue = event.target.value;
-        if(isFilter(newValue))
-        setFilter(newValue);
+        if(isFilter(newValue)){
+            setFilter(newValue);
+        }
     }
 
     function changeSort(event: ChangeEvent<HTMLSelectElement>) {
         const newValue = event.target.value;
-        if(isSort(newValue))
-        setSort(newValue);
+        if(isSort(newValue)) {
+            setSort(newValue);
+        }
+    }
+
+    function removeTodo(id: string) {
+        deleteTodo(id);
+        setTodoList(todoList.filter(
+            (todo) => todo.id !== id
+        ));
     }
 
     return <>
+        <h2>Alle Todo's</h2>
         <div className="filter-bar">
             <label>Filter:</label>
             <select name="filter" value={filter} onChange={changeFilter}>
@@ -45,15 +57,13 @@ export function TodoList({todos, deleteTodo}: TodoListProps) {
                 <option value="priority">Priorität</option>
             </select>
         </div>
-        <ul style={{
-            listStyleType: "none"
-        }}>
+        <ul className="todo-list">
             {visibleTodos.length ?
                 visibleTodos.map((todo) => (
-                <li key={todo.id}>
-                    <TodoItem todo={todo} deleteTodo={deleteTodo}/>
-                </li>
-            )) :
+                    <li key={todo.id}>
+                        <TodoItem todo={todo} deleteTodo={removeTodo}/>
+                    </li>
+                )) :
                 <p style={{color: "darkgray", fontSize: "larger"}}>Keine Todo's vorhanden</p>}
         </ul>
     </>

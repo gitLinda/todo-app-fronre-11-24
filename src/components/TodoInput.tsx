@@ -1,9 +1,7 @@
 import {ChangeEvent, FormEvent, useState} from "react";
 import {NewTodo, Priority} from "../model/Todo.ts";
-
-interface AddTodoProps {
-    addTodo: (todo: NewTodo) => void
-}
+import {addTodo} from "../api/todo-api.ts";
+import {useNavigate} from "react-router-dom";
 
 const emptyTodo = {
     assignee: "",
@@ -12,8 +10,9 @@ const emptyTodo = {
     description: ""
 }
 
-export function TodoInput({addTodo}: AddTodoProps) {
+export function TodoInput() {
     const [todo, setTodo] = useState<NewTodo>(emptyTodo)
+    const navigate = useNavigate()
 
     function handleChange(event: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) {
         const { name, value } = event.target;
@@ -27,6 +26,7 @@ export function TodoInput({addTodo}: AddTodoProps) {
         event.preventDefault();
         setTodo(emptyTodo)
         addTodo(todo);
+        navigate("/list")
     }
 
     return (
